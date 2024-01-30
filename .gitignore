@@ -1,0 +1,18 @@
+# Ignore files in the root directory
+.DS_Store
+.idea
+.vscode
+
+
+# Ignore files in specific directories and their subdirectories
+event-notify/dist
+event-notify/node_modules
+event-payment-service/dist
+event-payment-service/node_modules
+orders/dist
+orders/node_modules
+
+# .env
+event-notify/.env
+event-payment-service/.env
+orders/.env
