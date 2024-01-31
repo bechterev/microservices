@@ -10,7 +10,6 @@ import { AuthModule } from 'src/auth/auth.module';
 import { JwtModule } from '@nestjs/jwt';
 import { JWTConfig } from 'src/configs/jwt.config';
 import { OrderService } from './services/order.service';
-import { RabbitMQModule } from '@golevelup/nestjs-rabbitmq';
 import { RabbitMQConfig } from '../configs/rabbit.config';
 import { OrderSaga } from './sagas/order.saga';
 import { Saga } from './entities/saga.entity';
@@ -30,16 +29,6 @@ import { ConsumerService } from './services/amqp/consumer.service';
       inject: [JWTConfig],
     }),
     TypeOrmModule.forFeature([Order, Saga]),
-    RabbitMQModule.forRootAsync(RabbitMQModule, {
-      useFactory: (rabbitmqConfig: RabbitMQConfig) => ({
-        uri: rabbitmqConfig.uri,
-        exchanges: [
-          ...rabbitmqConfig.exchanges.recipient,
-          ...rabbitmqConfig.exchanges.sender,
-        ],
-      }),
-      inject: [RabbitMQConfig],
-    }),
   ],
   providers: [
     SagaStore,
