@@ -6,7 +6,11 @@
   3. Notify - управляет оповещением
 
 # Схема
-![Local Image](./circuit breaker.png)
+![Local Image](./circuit_breaker.png)
+
+<p align="center">
+  <img src="circuit_breaker.png" alt="Circuitbreaker" />
+</p>
 
 1. Инициализация заказа
 2. Получение заказа Payment service, создание payment
