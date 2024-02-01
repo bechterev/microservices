@@ -6,7 +6,7 @@ import { RabbitMQConfig, Exchange } from 'src/configs/rabbit.config';
 @Injectable()
 export class ProducerService {
   private channelWrapper: ChannelWrapper;
-
+  private logger = new Logger(ProducerService.name);
   constructor(private readonly rabbitConfig: RabbitMQConfig) {
     this.initialize();
   }
@@ -57,7 +57,7 @@ export class ProducerService {
           }),
         );
         await channel.bindQueue('deadLetterQueue', 'dlx', 'dlx-routing-key');
-        Logger.log('Channel setup completed for ProducerService.');
+        this.logger.log('Channel setup completed for ProducerService.');
       },
     });
   }
@@ -76,9 +76,9 @@ export class ProducerService {
         },
       );
 
-      Logger.log('Message added to the queue successfully.');
+      this.logger.log('Message added to the queue successfully.');
     } catch (error) {
-      Logger.error('Error adding message to the queue', error.stack);
+      this.logger.error('Error adding message to the queue', error.stack);
     }
   }
 

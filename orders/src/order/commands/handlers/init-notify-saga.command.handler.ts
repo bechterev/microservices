@@ -10,6 +10,9 @@ import { UserErrorMessages } from 'src/common/exception/user.exception';
 import { CustomCatch } from 'src/common/exception/custom-catch';
 import { Exchange, RabbitMQConfig } from 'src/configs/rabbit.config';
 import { ProducerService } from 'src/order/services/amqp/producer.service';
+import { delay } from 'src/common/utlis';
+import { StateService } from 'src/order/services/state.service';
+import { CircuitBreakerState } from 'src/common/enum/circuit-breaker-state.enum';
 
 @CommandHandler(InitNotifySagaCommand)
 export class InitNotifySagaCommandHandler
@@ -22,6 +25,7 @@ export class InitNotifySagaCommandHandler
     private readonly queryBus: QueryBus,
     private readonly rabbitConfig: RabbitMQConfig,
     private readonly producerService: ProducerService,
+    private readonly stateService: StateService,
   ) {
     this.exchange = rabbitConfig.exchanges.sender[2];
   }
@@ -47,6 +51,13 @@ export class InitNotifySagaCommandHandler
         state: orderStatus,
       }),
     ]);
+    const serviceStatus = await this.stateService.getStatusServices();
+    if (serviceStatus === CircuitBreakerState.IsOpen) {
+      throw new Error(`service notify is not available`);
+    }
+    if (serviceStatus === CircuitBreakerState.HalfOpen) {
+      await delay(5000);
+    }
     const order = await this.queryBus.execute(new GetOrderQuery(orderId));
     await this.producerService.addToQueue(
       {

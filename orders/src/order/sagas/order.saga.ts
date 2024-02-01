@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, Logger } from '@nestjs/common';
 import { CommandBus, ICommand, ofType, Saga } from '@nestjs/cqrs';
 import { Observable } from 'rxjs';
 import { switchMap } from 'rxjs/operators';
@@ -16,6 +16,7 @@ import { CompleteNotifySagaCommand } from '../commands/comlete-notify-saga.comma
 
 @Injectable()
 export class OrderSaga {
+  private logger = new Logger(OrderSaga.name);
   constructor(
     private sagaStore: SagaStore,
     private readonly commandBus: CommandBus,
@@ -25,7 +26,11 @@ export class OrderSaga {
     return events$.pipe(
       ofType(OrderAddedEvent),
       switchMap(async (event) => {
-        return await this.commandBus.execute(new InitSagaCommand(event));
+        try {
+          return await this.commandBus.execute(new InitSagaCommand(event));
+        } catch (err) {
+          this.logger.error(err);
+        }
       }),
     );
   };
@@ -35,23 +40,27 @@ export class OrderSaga {
     return events$.pipe(
       ofType(CreatePaymentEvent),
       switchMap(async (event) => {
-        const { sagaId, payment } = event;
-        const balanceIsSufficient = await this.commandBus.execute(
-          new CheckWalletCommand(
-            payment.userId,
-            payment.price,
-            payment.currency,
-          ),
-        );
-        return await this.commandBus.execute(
-          new UpdateSagaCommand(
-            sagaId,
-            payment.userId,
-            payment.id,
-            balanceIsSufficient,
-            payment.orderId,
-          ),
-        );
+        try {
+          const { sagaId, payment } = event;
+          const balanceIsSufficient = await this.commandBus.execute(
+            new CheckWalletCommand(
+              payment.userId,
+              payment.price,
+              payment.currency,
+            ),
+          );
+          return await this.commandBus.execute(
+            new UpdateSagaCommand(
+              sagaId,
+              payment.userId,
+              payment.id,
+              balanceIsSufficient,
+              payment.orderId,
+            ),
+          );
+        } catch (err) {
+          this.logger.error(err);
+        }
       }),
     );
   };
@@ -61,15 +70,19 @@ export class OrderSaga {
     return events$.pipe(
       ofType(PaymentCompletEvent),
       switchMap(async (event) => {
-        const { paymentComplete } = event;
-        return this.commandBus.execute(
-          new InitNotifySagaCommand(
-            paymentComplete.sagaId,
-            paymentComplete.orderId,
-            paymentComplete.userId,
-            paymentComplete.paymentStatus,
-          ),
-        );
+        try {
+          const { paymentComplete } = event;
+          return this.commandBus.execute(
+            new InitNotifySagaCommand(
+              paymentComplete.sagaId,
+              paymentComplete.orderId,
+              paymentComplete.userId,
+              paymentComplete.paymentStatus,
+            ),
+          );
+        } catch (err) {
+          this.logger.error(err);
+        }
       }),
     );
   };
@@ -79,8 +92,12 @@ export class OrderSaga {
     return events$.pipe(
       ofType(NotifyCompleteEvent),
       switchMap(async (event) => {
-        const { sagaId } = event;
-        return this.commandBus.execute(new CompleteNotifySagaCommand(sagaId));
+        try {
+          const { sagaId } = event;
+          return this.commandBus.execute(new CompleteNotifySagaCommand(sagaId));
+        } catch (err) {
+          this.logger.error(err);
+        }
       }),
     );
   };

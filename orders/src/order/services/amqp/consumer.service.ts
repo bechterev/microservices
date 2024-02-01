@@ -7,6 +7,7 @@ import { CreatePaymentEvent } from 'src/order/events/create-payment.event';
 import { NotifyCompleteEvent } from 'src/order/events/notify-complete.event';
 import { PaymentCompletEvent } from 'src/order/events/payment-complete.event';
 import { ProducerService } from './producer.service';
+import { StateService } from '../state.service';
 
 const PAYMENT_EXCHANGE = 'order.payment';
 const NOTIFY_EXCHANGE = 'order.notify';
@@ -23,6 +24,8 @@ export class ConsumerService {
     private readonly producerService: ProducerService,
     private readonly rabbitConfig: RabbitMQConfig,
     private readonly eventBus: EventBus,
+    private readonly stateService: StateService,
+    private logger = new Logger(ConsumerService.name),
   ) {
     this.initialize();
   }
@@ -86,7 +89,7 @@ export class ConsumerService {
             ) {
               this.proccesNotifyFailed(content);
             }
-            Logger.log('Received message from paymentQueue:', content);
+            this.logger.log('Received message from paymentQueue:', content);
 
             channel.ack(message);
           }
@@ -94,13 +97,13 @@ export class ConsumerService {
 
         await channel.consume('deadLetterQueue', async (message) => {
           if (message) {
-            const content = JSON.parse(message.content.toString());
-            Logger.log('Received message from deadLetterQueue:', content);
+            // We can send dead messages back to the queue if you want.
+            await this.stateService.addCountOverdue();
             channel.ack(message);
           }
         });
 
-        Logger.log('Channel setup completed for ConsumerService.');
+        this.logger.log('Channel setup completed for ConsumerService.');
       },
     });
   }
@@ -122,7 +125,6 @@ export class ConsumerService {
   }
 
   private async proccesNotifyFailed(msg) {
-    console.log('my msg', msg);
     const exchange = this.rabbitConfig.exchanges.sender[2];
     setTimeout(() => {
       this.producerService.addToQueue(msg, exchange);

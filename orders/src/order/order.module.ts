@@ -10,12 +10,13 @@ import { AuthModule } from 'src/auth/auth.module';
 import { JwtModule } from '@nestjs/jwt';
 import { JWTConfig } from 'src/configs/jwt.config';
 import { OrderService } from './services/order.service';
-import { RabbitMQConfig } from '../configs/rabbit.config';
 import { OrderSaga } from './sagas/order.saga';
 import { Saga } from './entities/saga.entity';
 import { OrderQueryHandlers } from './queries/handlers';
 import { ProducerService } from './services/amqp/producer.service';
 import { ConsumerService } from './services/amqp/consumer.service';
+import { CacheModule } from '@nestjs/cache-manager';
+import { StateService } from './services/state.service';
 
 @Module({
   controllers: [OrderController],
@@ -29,6 +30,7 @@ import { ConsumerService } from './services/amqp/consumer.service';
       inject: [JWTConfig],
     }),
     TypeOrmModule.forFeature([Order, Saga]),
+    CacheModule.register({ ttl: 0 }),
   ],
   providers: [
     SagaStore,
@@ -39,6 +41,7 @@ import { ConsumerService } from './services/amqp/consumer.service';
     ...OrderQueryHandlers,
     ProducerService,
     ConsumerService,
+    StateService,
   ],
 })
 export class OrderModule {}
