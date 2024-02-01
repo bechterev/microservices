@@ -6,7 +6,7 @@ import { RabbitMQConfig, Exchange } from 'src/config/rabbit.config';
 @Injectable()
 export class ProducerService {
   private channelWrapper: ChannelWrapper;
-
+  private logger = new Logger(ProducerService.name);
   constructor(private readonly rabbitConfig: RabbitMQConfig) {
     this.initialize();
   }
@@ -45,8 +45,6 @@ export class ProducerService {
             }
           }),
         );
-
-        Logger.log('Channel setup completed for ProducerService.');
       },
     });
   }
@@ -66,10 +64,8 @@ export class ProducerService {
           expiration: 6000,
         },
       );
-
-      Logger.log('Message added to the queue successfully.');
     } catch (error) {
-      Logger.error('Error adding message to the queue', error.stack);
+      this.logger.error('Error adding message to the queue', error.stack);
     }
   }
 

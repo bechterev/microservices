@@ -12,7 +12,7 @@ const ROUTING_KEY_ORDER_COMPLETE = 'order.complete';
 @Injectable()
 export class ConsumerService {
   private channelWrapper: ChannelWrapper;
-
+  private logger = new Logger(ConsumerService.name);
   constructor(
     private readonly rabbitConfig: RabbitMQConfig,
     private readonly eventBus: EventBus,
@@ -57,7 +57,6 @@ export class ConsumerService {
           async (message) => {
             if (message) {
               const content = JSON.parse(message.content.toString());
-              console.log(`get content ${JSON.stringify(content)}`);
               const { exchange, routingKey } = message.properties.headers;
               if (
                 exchange === EXCHANGE_NOTIFY_ORDER &&
@@ -71,7 +70,7 @@ export class ConsumerService {
           },
         );
 
-        Logger.log('Channel setup completed for ConsumerService.');
+        this.logger.log('Channel setup completed for ConsumerService.');
       },
     });
   }

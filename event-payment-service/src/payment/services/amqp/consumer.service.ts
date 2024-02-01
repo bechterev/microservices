@@ -15,7 +15,7 @@ const ORDER_PAY_START_TOPIC = 'order.pay.start';
 @Injectable()
 export class ConsumerService {
   private channelWrapper: ChannelWrapper;
-
+  private logger = new Logger(ConsumerService.name);
   constructor(
     private readonly rabbitConfig: RabbitMQConfig,
     private readonly eventBus: EventBus,
@@ -71,7 +71,7 @@ export class ConsumerService {
             ) {
               this.proccesPaymentComplete(content);
             }
-            Logger.log(
+            this.logger.log(
               'Received message from paymentQueue:',
               content,
               exchange,
@@ -82,7 +82,7 @@ export class ConsumerService {
           }
         });
 
-        Logger.log('Channel setup completed for ConsumerService.');
+        this.logger.log('Channel setup completed for ConsumerService.');
       },
     });
   }

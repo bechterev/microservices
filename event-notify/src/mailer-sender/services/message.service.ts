@@ -1,5 +1,5 @@
 import { RabbitSubscribe } from '@golevelup/nestjs-rabbitmq';
-import { Injectable } from '@nestjs/common';
+import { Injectable, Logger } from '@nestjs/common';
 import { EventBus } from '@nestjs/cqrs';
 import { OrderNotify } from '../types/order-notify.type';
 import { OrderStatusEvent } from '../events/order-status.event';
@@ -9,7 +9,10 @@ const ROUTING_KEY_ORDER_COMPLETE = 'order.complete';
 
 @Injectable()
 export class MessageService {
-  constructor(private readonly eventBus: EventBus) {}
+  constructor(
+    private readonly eventBus: EventBus,
+    private readonly logger: Logger,
+  ) {}
 
   @RabbitSubscribe({
     exchange: EXCHANGE_NOTIFY_ORDER,
@@ -27,7 +30,7 @@ export class MessageService {
         }),
       );
     } catch (err) {
-      console.log(err);
+      this.logger.error(err);
     }
   }
 }

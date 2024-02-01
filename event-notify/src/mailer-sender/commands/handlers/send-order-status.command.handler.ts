@@ -32,10 +32,8 @@ export class SendOrderStatusCommandHandler
         text,
         to,
       });
-      console.log('otpa');
       await this.produceService.NotifySend({ sagaId });
     } catch (err) {
-      console.log('error', err);
       await this.produceService.NotifySend({ sagaId, email: to, order }, true);
     }
   }
