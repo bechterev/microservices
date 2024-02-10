@@ -1,6 +1,5 @@
 import { Injectable } from '@nestjs/common';
 import { ConfigService } from './config.service';
-import { RabbitMQQueueConfig } from '@golevelup/nestjs-rabbitmq';
 
 export type Exchange = {
   name: string;
@@ -17,8 +16,6 @@ export type Exchanges = {
 export class RabbitMQConfig {
   public readonly uri: string;
   public exchanges: Exchanges;
-  public queueRecipients: RabbitMQQueueConfig;
-  public queueSender: RabbitMQQueueConfig;
 
   constructor(configService: ConfigService) {
     this.uri = configService.getString('RABBIT_URI');

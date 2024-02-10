@@ -1,6 +1,7 @@
 import { Body, Controller, Get, Param, Post, Put } from '@nestjs/common';
 import { UserService } from '../services/user.service';
 import { User } from '../entity/user.entity';
+import * as Sentry from '@sentry/node';
 
 @Controller('users')
 export class UserController {
@@ -23,6 +24,11 @@ export class UserController {
 
   @Put(':id')
   updateUser(@Body() user: User): Promise<User> {
-    return this.updateUser(user);
+    try {
+      return this.userService.updateUser(user);
+    } catch (err) {
+      Sentry.captureException(err);
+      return Promise.reject(err);
+    }
   }
 }

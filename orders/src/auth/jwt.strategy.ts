@@ -8,7 +8,6 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
   constructor(private readonly jwtConfig: JWTConfig) {
     super({
       jwtFromRequest: ExtractJwt.fromAuthHeaderAsBearerToken(),
-      ignoreExpiration: false,
       secretOrKey: jwtConfig.secret,
       ignoreNotBefore: false,
     });

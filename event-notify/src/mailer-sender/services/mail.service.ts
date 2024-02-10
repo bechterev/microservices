@@ -14,9 +14,10 @@ export class MailService {
   }
 
   async sendMessage(messageObj: MailObject) {
-    await this.mailerService.sendMail({
+    const message = await this.mailerService.sendMail({
       ...messageObj,
       from: this.appConfig.email_to,
     });
+    return message;
   }
 }

@@ -1,9 +1,10 @@
-import { ICommandHandler } from '@nestjs/cqrs';
+import { CommandHandler, ICommandHandler } from '@nestjs/cqrs';
 import { UpdateUserCommand } from '../update-user.command';
 import { UserStore } from 'src/user/store/user.store';
 import { User } from 'src/user/entity/user.entity';
 import { UserErrorMessages } from 'src/common/exception/user.exception';
 
+@CommandHandler(UpdateUserCommand)
 export class UpdateUserHandler implements ICommandHandler<UpdateUserCommand> {
   constructor(private readonly store: UserStore) {}
 

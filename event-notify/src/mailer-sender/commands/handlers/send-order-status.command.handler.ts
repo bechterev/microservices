@@ -3,6 +3,7 @@ import { SendOrderStatusCommand } from '../send-order-status.command';
 import { MailService } from 'src/mailer-sender/services/mail.service';
 import { RabbitMQConfig } from 'src/config/rabbit.config';
 import { ProducerService } from 'src/mailer-sender/services/amqp/producer.service';
+import * as Sentry from '@sentry/node';
 
 @CommandHandler(SendOrderStatusCommand)
 export class SendOrderStatusCommandHandler
@@ -26,14 +27,18 @@ export class SendOrderStatusCommandHandler
     }
     const html = `<b>Hello</b><br><p><i>${text}</i></p>`;
     try {
-      await this.mailService.sendMessage({
+      const message = await this.mailService.sendMessage({
         html,
         subject,
         text,
         to,
       });
+      if (!message) {
+        throw new Error('message not delivered');
+      }
       await this.produceService.NotifySend({ sagaId });
     } catch (err) {
+      Sentry.captureException(err);
       await this.produceService.NotifySend({ sagaId, email: to, order }, true);
     }
   }

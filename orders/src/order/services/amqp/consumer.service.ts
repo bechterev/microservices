@@ -19,13 +19,12 @@ const NOTIFY_FAILED_TOPIC = 'complete.order.failed';
 @Injectable()
 export class ConsumerService {
   private channelWrapper: ChannelWrapper;
-
+  private logger = new Logger(ConsumerService.name);
   constructor(
     private readonly producerService: ProducerService,
     private readonly rabbitConfig: RabbitMQConfig,
     private readonly eventBus: EventBus,
     private readonly stateService: StateService,
-    private logger = new Logger(ConsumerService.name),
   ) {
     this.initialize();
   }

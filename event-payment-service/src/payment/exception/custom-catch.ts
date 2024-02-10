@@ -1,5 +1,6 @@
 import 'reflect-metadata';
 import { PaymentsError, errorMessages } from './payment-error';
+import * as Sentry from '@sentry/node';
 
 export const CustomCatch = () => {
   return function (
@@ -15,9 +16,9 @@ export const CustomCatch = () => {
       } catch (error) {
         if (error instanceof PaymentsError) {
           const errorMessage = errorMessages[error.type] || 'Unknown error';
-          console.error(errorMessage);
+          Sentry.captureException(errorMessage);
         } else {
-          console.error(`Command execution error: ${error.message}`);
+          Sentry.captureException(error);
         }
       }
     };

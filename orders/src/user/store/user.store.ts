@@ -2,6 +2,7 @@ import { Injectable } from '@nestjs/common';
 import { User } from '../entity/user.entity';
 import { Repository } from 'typeorm';
 import { InjectRepository } from '@nestjs/typeorm';
+import * as Sentry from '@sentry/node';
 
 @Injectable()
 export class UserStore {
@@ -43,15 +44,19 @@ export class UserStore {
     const userFromStore = await this.userRepository.findOne({
       where: { id: user.id },
     });
-    if (!userFromStore) return new Error(`User not found`);
+    if (!userFromStore) {
+      const err = new Error(`User not found`);
+      Sentry.captureException(err);
+      return err;
+    }
     try {
       await this.userRepository.update(
-        { id: user.id },
+        { id: userFromStore.id },
         { username: user.username, password: user.password },
       );
       return await this.userRepository.findOne({ where: { id: user.id } });
     } catch (err) {
-      return err;
+      return Promise.reject(err);
     }
   }
 }

@@ -1,6 +1,7 @@
 import 'reflect-metadata';
 import { UsersError, userMessagesRecord } from './user.exception';
 import { OrderError, orderMessagesRecord } from './order.exception';
+import * as Sentry from '@sentry/node';
 
 export const CustomCatch = () => {
   return function (
@@ -27,8 +28,7 @@ export const CustomCatch = () => {
           default:
             break;
         }
-
-        console.error(errorMessage);
+        Sentry.captureException(errorMessage);
       }
     };
 

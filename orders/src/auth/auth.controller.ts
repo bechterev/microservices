@@ -16,4 +16,10 @@ export class AuthorizationController {
     const response = await this.authorizationService.signIn(username, password);
     return response;
   }
+
+  @Post('/refresh-token')
+  async refreshToken(@Body() refreshToken: string): Promise<any> {
+    const response = await this.authorizationService.refreshToken(refreshToken);
+    return response;
+  }
 }
